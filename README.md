@@ -1,8 +1,8 @@
 # Glia
 
 As your app grows, you may find that a lot of logic is necessary in your views. 
-Implementing a proper view layer, such as Cells, will help to reduce complexity by encapsulating this logic into 
-classes for specific parts of the page. 
+Implementing a proper view layer, such as [Cells](https://github.com/apotonick/cells), 
+will help to reduce complexity by encapsulating this logic into classes for specific parts of the page. 
 
 But what happens when you need somewhere to manage the logic determining what cells go where and on what page?
 This is where Glia comes in handy, it provides an additional `layout` layer to manage your views.
@@ -28,9 +28,9 @@ Or install it yourself as:
 ### Cells 
 A Cell is a view object that renders a certain part of the page.
 
-Glia does not provide an implementation of cells, but expects that you have this concept as part of your project. 
+**Glia does not provide an implementation of cells, but expects that you have this concept as part of your project.** 
 
-You can use a gem such as Cells, to provide this interface. 
+You can use a gem such as [Cells](https://github.com/apotonick/cells), to provide this interface. 
 
 Glia provides a mixin, `Glia::Cell` that you should include in your cells to provide methods that help with things 
 such as setting/getting child cells, and accessing the layout layer. 
@@ -89,7 +89,7 @@ a very good idea to include the module name in your handles. e.g.
 [:default, :sales_quotes, :sales_quotes_show]
 ```
 
-The order of the set of handles is important. Glia will start at the first handle (e.g. `:default`) when building
+**The order of the set of handles is important.** Glia will start at the first handle (e.g. `:default`) when building
 the layout. 
 Each successive handle will modify the layout generated from the previous handle. 
 In the DSL example above, if our handles were `[:default, :cake_view, :pavlova_view]`, then the template_name for 
@@ -97,7 +97,7 @@ the `cake_ingredients` cell will be 'cake/pavlova_ingredients', and we won't hav
 
 Using this system, we can have considerable flexibility in the layout based on the factors that we use to determine the 
 handles. For example, we can add or remove menu items from a navigation cell if the customer is logged in, 
-or if we are on the customer account page. We can add or remove certain cells on the page based onthe type of product
+or if we are on the customer account page. We can add or remove certain cells on the page based on the type of product
 that we are viewing.
  
 Generating the handles for a request/action and passing them to the layout during rendering is decribed in further 
@@ -136,6 +136,41 @@ This method will run the specified method (with the given arguments) on the cell
 * `name` The name of the method
 * `args` An array of arguments that will be passed to the method.
 
+
+### Areas 
+
+An 'area' is a distinct layout that is completely separate from another area. 
+For example many apps would have a `:frontend` area, and a `:backend` area.
+
+There are two ways you can define layouts for different areas
+
+#### 1. By wrapping your DSL (TODO: Not Completed yet)
+If you app code is organised into modules, you may wish to keep a layout file in each module. 
+This way, the layout files can each place cells related to their own modules on any page of the app.
+
+Just wrap the DSL with `Glia.area(:area_name) do .. end`, 
+then make sure the layout files are required as part of your app's bootstrap process.  
+
+```ruby
+Glia.area(:frontend) do 
+  handle :pavlova_view do
+    reference name: :specifications do
+      remove name: :cake_specs
+    end
+    reference name: :cake_ingredients, template_name: 'cake/pavlova_ingredients' do
+      action name: :add_ingredient, args: ['Eggs', '6 Large']
+    end
+  end
+end
+```
+
+#### 2. By Directories
+If your app doesn't group code by modules, or you wish to keep all your layout files in one place,
+just pick a directory you want to keep your layout files in, and create one subdirectory for each area. 
+
+Any files within those area subdirectories will be parsed using the layout DSL.
+Refer to *Configure the layout* to specificy the directory.
+
 ### Integration
 
 #### Generate the handles
@@ -144,14 +179,13 @@ The handles will be generated in the controller based on the request/loaded obje
 
 #### Configure the layout 
 
-Tell it where the layout files are stored. The layout files will be organised into subdirectories. 
-The first subdirectory is the name of the 'area'.
+If you organise your areas by directory, tell it where the layout files are stored. 
 
 ```ruby
 Glia::Layout.layout_dir = File.join(Dir.pwd, 'test', 'fixtures', 'layout')
 ```
 
-Tell it what namespace to use when finding classes for a class code
+If you wish to use class codes in place of classes, Tell it what namespace to use when finding classes for a class code. 
 
 ```ruby
 Glia::Layout.view_namespace = Fixtures::View
@@ -163,6 +197,12 @@ Pick an 'area' to render, e.g. `:frontend` or `:admin`, and pass this into the c
 
 ````ruby
 layout = Glia::Layout.new(:frontend, [:default, :cake_view, :pavlova_view])
+```
+
+Or (TODO)
+
+````ruby
+layout = Glia.area(:frontend, [:default, :cake_view, :pavlova_view])
 ```
 
 ### Render the layout.
@@ -177,6 +217,8 @@ layout.cell(:root).render
 That is all. Your root cell's rendering process should be such that the child cells are picked out and rendered,
 and those child cells pick out and render their child cells, and so on until the whole layout tree is rendered. 
 
+## Suggestions
+
 ### Suggested Cell Types
 
 * `Template` A generic cell that has a `template_name` and a data passed into its constructor in key/value pairs.
@@ -188,12 +230,21 @@ and those child cells pick out and render their child cells, and so on until the
 * `Html::Head` A cell with specific methods for including asset tags etc.
 * Specific classes for cells that have their own logic. E.g. `Product::Price`, `Category::List` 
 
+### Getting data to cells
+
+Try one or more of these options:
+
+* Pass the data as locals to each cell or child cell as you render it. 
+* Create a registry (using e.g. [RequestStore](https://github.com/steveklabnik/request_store)), which the controller can
+  pass data to, and the cells can read data from. 
+* If more flexibility is required, the controller can pull a specific cell from the layout, and call a method on it. 
+
 ## Notes
 * When the DSL is parsed, the result is a simple hash of values that describes the layout. 
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/glia/fork )
+1. Fork it ( https://github.com/danelowe/glia/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
