@@ -41,6 +41,7 @@ Layout files are written with a DSL that is designed to help describe the layout
 ```ruby
 # layout/frontend/default.rb
 Glia.area(:frontend) do 
+  view_namespace Fixtures::View
   handle :default do
     cell name: :root, class: :'core/html', template_name: 'root', missing_accessor: 'ignore_me' do
       cell name: :header, class: :template, template_name: 'header'
@@ -75,6 +76,10 @@ end
 
 ![Pav View](readme/layout_pav.png?raw=true)
 
+#### View Namespace (Optional)
+
+Pass a class/module. Any cell created within this area definition using a string or symbol for `class` 
+will use this namespace when getting the actual class. 
 
 #### Handle
 
@@ -180,14 +185,6 @@ end
 #### Generate the handles
 
 The handles will be generated in the controller based on the request/loaded objects/controller. Examples to come.
-
-#### Configure the layout 
-
-If you wish to use class codes in place of classes, Tell it what namespace to use when finding classes for a class code. 
-
-```ruby
-Glia::Layout.view_namespace = Fixtures::View
-```
 
 #### Create a layout
 

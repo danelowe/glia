@@ -2,7 +2,6 @@ require 'test_helper'
 class Glia::Layout::Test < UnitTest
   describe Glia::Layout do
 
-    Glia::Layout.view_namespace = Fixtures::View
     let(:layout){ Glia.layout(:frontend, [:default, :cake_view, :pavlova_view]) }
 
     def test_update

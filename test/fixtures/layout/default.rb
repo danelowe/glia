@@ -1,4 +1,5 @@
 Glia.area(:frontend) do
+  view_namespace Fixtures::View
 
   handle :default do
     cell name: :root, class: :'core/html', template_name: 'root', missing_accessor: 'ignore_me' do

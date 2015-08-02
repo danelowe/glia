@@ -6,6 +6,11 @@ module Glia
       @data = {}
     end
 
+    def view_namespace(namespace)
+      @view_namespace = namespace
+      self
+    end
+
     def handle(key, &blk)
       begin
         @current_scope = @data[key] ||= {}
@@ -15,10 +20,14 @@ module Glia
         @current_scope = nil
         @current_cell = nil
       end
+      self
     end
 
     def cell(definition, &blk)
       raise Glia::Errors::SyntaxError, 'cell must have a class' if definition[:class].nil?
+      # Store the namespace here, for use when building layout.
+      # We delay resolving the class, in case a block is not used, or is defined later.
+      definition[:view_namespace] = @view_namespace unless @view_namespace.nil?
       _cell(definition, &blk)
     end
 

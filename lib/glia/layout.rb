@@ -19,14 +19,15 @@ module Glia
         code = definition.delete(:class)
         actions = definition.delete(:actions)
         children = definition.delete(:children)
-        @cells[name] = view_factory.build(code, definition, actions)
+        namespace = definition.delete(:view_namespace) || Object
+        @cells[name] = view_factory.build(code, namespace, definition, actions)
         children.each{|p, n| @cells[name].children[p] = cell(n)} unless children.nil?
       end
       @cells[name]
     end
 
     def view_factory
-      @view_factory ||= ViewFactory.new(self.class.view_namespace)
+      @view_factory ||= ViewFactory.new
     end
 
   end
