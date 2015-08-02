@@ -44,6 +44,10 @@ Glia.area(:frontend) do
   handle :default do
     cell name: :root, class: :'core/html', template_name: 'root', missing_accessor: 'ignore_me' do
       cell name: :header, class: :template, template_name: 'header'
+      cell name: :sidebar, class: :list do
+        # ...
+      end
+      cell name: :footer, class: :template, template_name: 'footer'
     end
   end
   handle :cake_view do
@@ -66,6 +70,11 @@ Glia.area(:frontend) do
   end
 end
 ```
+
+![Cake View](readme/layout_cake.png?raw=true)
+
+![Pav View](readme/layout_pav.png?raw=true)
+
 
 #### Handle
 
