@@ -2,9 +2,8 @@ require 'test_helper'
 class Glia::Layout::Test < UnitTest
   describe Glia::Layout do
 
-    Glia::Layout.layout_dir = File.join(Dir.pwd, 'test', 'fixtures', 'layout')
     Glia::Layout.view_namespace = Fixtures::View
-    let(:layout){ Glia::Layout.new(:frontend, [:default, :cake_view, :pavlova_view]) }
+    let(:layout){ Glia.layout(:frontend, [:default, :cake_view, :pavlova_view]) }
 
     def test_update
       assert_equal :'core/html', layout.update.to_h[:default][:root][:class]
@@ -12,6 +11,7 @@ class Glia::Layout::Test < UnitTest
 
     def test_data
       assert_equal :'core/html', layout.data[:root][:class]
+      assert_nil layout.data[:non_existent]
     end
 
     def test_cell
@@ -27,5 +27,6 @@ class Glia::Layout::Test < UnitTest
       assert_instance_of Fixtures::View::Template, ingredients
       assert_equal 'cake/pavlova_ingredients', ingredients.template_name
     end
+
   end
 end
