@@ -1,12 +1,20 @@
 module Glia
   class ViewFactory
 
-    def build(code, view_namespace = Object, definition = {}, actions = [])
-      object = find_class(code, view_namespace).new(definition)
+    def build(code, view_namespace = Object, definition = {}, actions = [], *args)
+      object = instantiate(find_class(code, view_namespace), definition, *args)
+      apply_actions(object, actions)
+      object
+    end
+
+    def instantiate(klass, definition, *args)
+      klass.new(*(args|[definition]))
+    end
+
+    def apply_actions(object, actions)
       actions.each do |action|
         object.send(action[:name], *action[:args])
       end unless actions.nil?
-      object
     end
 
     def find_class(code, view_namespace = Object)
@@ -19,5 +27,6 @@ module Glia
         code
       end
     end
+
   end
 end

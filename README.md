@@ -230,6 +230,50 @@ Try one or more of these options:
   pass data to, and the cells can read data from. 
 * If more flexibility is required, the controller can pull a specific cell from the layout, and call a method on it. 
 
+### Customise the ViewFactory
+
+Example for Customised Lotus Views
+
+```ruby
+module Frontend
+  class Application < Lotus::Application
+
+    def renderer
+      @custom_renderer ||= Client::RenderingPolicy.new(configuration)
+    end
+
+    configure do
+      # ...
+    end
+
+  end
+end
+```
+
+```ruby
+require 'glia'
+class Client::RenderingPolicy < Lotus::RenderingPolicy
+
+  class ViewFactory < Glia::ViewFactory
+    def instantiate(klass, definition, *args)
+      #@todo: Allow blocks/cells to subscribe to registry values.
+      locals = args[0].nil? ? definition : definition.merge(args[0])
+      klass.new({format: :html}.merge(locals))
+    end
+  end
+
+  def _render_action(action, response)
+    if successful?(response)
+      RequestStore.store[:action_exposures] = action.exposures
+      layout = Glia.layout(:frontend, action.handles)
+      layout.view_factory = ViewFactory.new
+      layout.cell(:root, action.exposures).render
+    end
+  end
+
+end
+```
+
 ## Notes
 * When the DSL is parsed, the result is a simple hash of values that describes the layout. 
 
