@@ -40,27 +40,29 @@ Layout files are written with a DSL that is designed to help describe the layout
 
 ```ruby
 # layout/frontend/default.rb
-handle :default do
-  cell name: :root, class: :'core/html', template_name: 'root', missing_accessor: 'ignore_me' do
-    cell name: :header, class: :template, template_name: 'header'
+Glia.area(:frontend) do 
+  handle :default do
+    cell name: :root, class: :'core/html', template_name: 'root', missing_accessor: 'ignore_me' do
+      cell name: :header, class: :template, template_name: 'header'
+    end
   end
-end
-handle :cake_view do
-  reference name: :root do
-    cell name: :details, class: :template, template_name: 'cake_details', position: :content do
-      cell name: :specifications, class: :list do
-        cell name: :cake_specs, class: :template, template_name: 'cake/specs'
-        cell name: :cake_ingredients, class: :template, template_name: 'cake/ingredients'
+  handle :cake_view do
+    reference name: :root do
+      cell name: :details, class: Fixtures::View::Template, template_name: 'cake_details', position: :content do
+        cell name: :specifications, class: :list do
+          cell name: :cake_specs, class: 'Template', template_name: 'cake/specs'
+          cell name: :cake_ingredients, class: :template, template_name: 'cake/ingredients'
+        end
       end
     end
   end
-end
-handle :pavlova_view do
-  reference name: :specifications do
-    remove name: :cake_specs
-  end
-  reference name: :cake_ingredients, template_name: 'cake/pavlova_ingredients' do
-    action name: :add_ingredient, args: ['Eggs', '6 Large']
+  handle :pavlova_view do
+    reference name: :specifications do
+      remove name: :cake_specs
+    end
+    reference name: :cake_ingredients, template_name: 'cake/pavlova_ingredients' do
+      action name: :add_ingredient, args: ['Eggs', '6 Large']
+    end
   end
 end
 ```
@@ -114,7 +116,10 @@ root cell, being contained in its output.
 
 * `name` is the name of the cell in the layout. Each cell must have its own unique name within the layout
 * `class` is a code that the layout system uses to figure out what class to instantiate when building the cell.
-  This can either be a symbol~~, or a class (todo)~~. More details on this in the *Integration* section
+  This can either be:
+  * A String representing the class name, either fully qualified or from the view_namespace (see **Integration**) 
+  * A Symbol Representing the class name from the view_namespace, separated by '/' for each sub-namespace. 
+  * A Class
 * `position` This is a code that should be unique within the parent cell. If omitted, will default to the same value as
   `name`. This code is used to control where the cell is rendered within the parent cell, using the `cell` 
   method. For example, the `'cake_details'` template file might have a call to `cell(:specifications).render` in a 
@@ -142,9 +147,6 @@ This method will run the specified method (with the given arguments) on the cell
 An 'area' is a distinct layout that is completely separate from another area. 
 For example many apps would have a `:frontend` area, and a `:backend` area.
 
-There are two ways you can define layouts for different areas
-
-#### 1. By wrapping your DSL (TODO: Not Completed yet)
 If you app code is organised into modules, you may wish to keep a layout file in each module. 
 This way, the layout files can each place cells related to their own modules on any page of the app.
 
@@ -164,13 +166,6 @@ Glia.area(:frontend) do
 end
 ```
 
-#### 2. By Directories
-If your app doesn't group code by modules, or you wish to keep all your layout files in one place,
-just pick a directory you want to keep your layout files in, and create one subdirectory for each area. 
-
-Any files within those area subdirectories will be parsed using the layout DSL.
-Refer to *Configure the layout* to specificy the directory.
-
 ### Integration
 
 #### Generate the handles
@@ -178,12 +173,6 @@ Refer to *Configure the layout* to specificy the directory.
 The handles will be generated in the controller based on the request/loaded objects/controller. Examples to come.
 
 #### Configure the layout 
-
-If you organise your areas by directory, tell it where the layout files are stored. 
-
-```ruby
-Glia::Layout.layout_dir = File.join(Dir.pwd, 'test', 'fixtures', 'layout')
-```
 
 If you wish to use class codes in place of classes, Tell it what namespace to use when finding classes for a class code. 
 
@@ -193,17 +182,13 @@ Glia::Layout.view_namespace = Fixtures::View
 
 #### Create a layout
 
-Pick an 'area' to render, e.g. `:frontend` or `:admin`, and pass this into the constructor along with the handles.
+Pick an 'area' to render, e.g. `:frontend` or `:admin`, and pass this into the layout method along with the handles.
 
 ````ruby
-layout = Glia::Layout.new(:frontend, [:default, :cake_view, :pavlova_view])
+layout = Glia.layout(:frontend, [:default, :cake_view, :pavlova_view])
 ```
 
-Or (TODO)
-
-````ruby
-layout = Glia.area(:frontend, [:default, :cake_view, :pavlova_view])
-```
+This returns an instance of Glia::Layout
 
 ### Render the layout.
 

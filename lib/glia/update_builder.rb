@@ -42,13 +42,14 @@ module Glia
     end
 
     def merge(handles)
-      data = {}
+      _data = {}
       merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2 }
-      handles.each{|h| data.merge!(@data[h], &merger)}
-      data.delete_if{|k, v|  v.nil?}.each_with_object({}) do |(name, definition), hash|
-        definition[:children] = definition[:children].delete_if{|position, n| data[n].nil?}
-        definition.delete(:children) if definition[:children].empty?
-        hash[name] = definition
+      handles.each{|h| _data = _data.merge(@data[h].clone, &merger) unless @data[h].nil?}
+      _data.delete_if{|k, v|  v.nil? || v[:class].nil?}.each_with_object({}) do |(name, definition), hash|
+        d = definition.clone
+        d[:children].delete_if{|position, n| _data[n].nil?}
+        d.delete(:children) if d[:children].empty?
+        hash[name] = d
       end
     end
 

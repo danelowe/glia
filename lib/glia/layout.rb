@@ -7,12 +7,8 @@ module Glia
     end
 
     def initialize(area, handles)
-      #@todo: keep a registry of updates by area in a separate singleton (UpdateRegistry) that can be stored in memory
-      #@todo UpdateRegistry can load update_data from cache and instantiate new UpdateBuilder directly with cached data.
-      @update = UpdateBuilder.new
+      @update = UpdateRegistry.area(area)
       @cells = {}
-      files = Dir[File.join(self.class.layout_dir, '/**/*.rb')]
-      files.each{|f| @update.instance_eval(File.open(f).read, f)}
       @handles = handles
       @data = @update.merge(@handles)
     end

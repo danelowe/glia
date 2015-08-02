@@ -7,10 +7,9 @@ Gem::Specification.new do |spec|
   spec.name          = "glia"
   spec.version       = Glia::VERSION
   spec.authors       = ["Dane Lowe"]
-  spec.email         = ["dane@avidonline.co.nz"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.email         = ["dane.r.lowe@gmail.com"]
+  spec.summary       = %q{Manage App Layouts.}
+  spec.homepage      = "https://github.com/danelowe/glia"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -20,5 +19,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency 'minitest'
+  spec.add_development_dependency 'minitest', '~> 5.0'
 end
