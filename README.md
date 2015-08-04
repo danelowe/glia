@@ -61,7 +61,7 @@ Glia.area(:frontend) do
       end
     end
   end
-  handle :pavlova_view do
+  handle :pavlova_view, :new_view do
     reference name: :specifications do
       remove name: :cake_specs
     end

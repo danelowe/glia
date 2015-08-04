@@ -11,14 +11,16 @@ module Glia
       self
     end
 
-    def handle(key, &blk)
-      begin
-        @current_scope = @data[key] ||= {}
-        @current_cell = nil
-        instance_eval &blk
-      ensure
-        @current_scope = nil
-        @current_cell = nil
+    def handle(*keys, &blk)
+      keys.each do |key|
+        begin
+          @current_scope = @data[key] ||= {}
+          @current_cell = nil
+          instance_eval &blk
+        ensure
+          @current_scope = nil
+          @current_cell = nil
+        end
       end
       self
     end
@@ -32,7 +34,7 @@ module Glia
     end
 
     def remove(definition)
-      @current_scope[definition.delete(:name)] = nil
+      _cell(definition.merge({_removed: true}))
     end
 
     def reference(definition, &blk)
@@ -52,9 +54,16 @@ module Glia
 
     def merge(handles)
       _data = {}
+
+      # Merge all of the handles together
       merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2 }
       handles.each{|h| _data = _data.merge(@data[h].clone, &merger) unless @data[h].nil?}
-      _data.delete_if{|k, v|  v.nil? || v[:class].nil?}.each_with_object({}) do |(name, definition), hash|
+
+      # Remove orphan references, or deleted cells
+      _data = _data.delete_if{|k, v|  v.nil? || v[:class].nil? || v[:_removed]}
+
+      # Tidy up child references for deleted children, empty child lists
+      _data.each_with_object({}) do |(name, definition), hash|
         d = definition.clone
         d[:children].delete_if{|position, n| _data[n].nil?}
         d.delete(:children) if d[:children].empty?
@@ -70,7 +79,7 @@ module Glia
         name = definition.delete(:name)
         position = definition.delete(:position) || name
         old_cell = @current_cell
-        @current_cell = @current_scope[name] = {children: {}}.merge(definition)
+        @current_cell = (@current_scope[name] ||= {children: {}}).merge!(definition)
         unless old_cell.nil?
           old_cell[:children][position] = name
         end

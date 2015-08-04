@@ -18,5 +18,9 @@ module Glia
       raise Errors::MissingCellError, "No child cell in position #{code}" if name.nil?
       @children[code] ||= layout.cell(name, *args)
     end
+
+    def child_definitions
+      @child_definitions ||= {}
+    end
   end
 end
