@@ -1,6 +1,6 @@
 module Glia
   module Cell
-    attr_accessor :child_definitions, :layout
+    attr_accessor :child_definitions, :layout, :blocks
 
     # To be overloaded, but here to prevent errors if we don't define initialize
     def initialize(config)
@@ -21,6 +21,10 @@ module Glia
 
     def child_definitions
       @child_definitions ||= {}
+    end
+
+    def blocks
+      @blocks ||= []
     end
   end
 end

@@ -139,12 +139,13 @@ root cell, being contained in its output.
   method. For example, the `'cake_details'` template file might have a call to `cell(:specifications).render` in a 
   specific place to render that specific child cell.
 * Any other parameters passed to `cell` will be passed through to the cell's constructor.
-* Anything in the block will operate on this cell. E.g. calling cell withing the block will create a child cell.
+* Anything in the block will operate on this cell. E.g. calling cell within the block will create a child cell.
   
 #### Reference
 
-The `reference` method refers to a cell that has been added in a previous handle. Anything parameter will overwrite the 
-same parameter defined in a previous handle. Any contents of the block will operate on the previously defined cell.
+The `reference` method refers to a cell that has been added in a previous (or subsequent) handle. 
+Any parameter will overwrite the same parameter defined in a previous handle. 
+Any contents of the block will operate on the previously defined cell.
 
 The technical difference from the cell method is that instead of requiring the `class` parameter, it disallows it, 
 and a reference without a matching cell would be ignored rather than creating a cell in the layout.
@@ -159,7 +160,7 @@ This method will run the specified method (with the given arguments) on the cell
 ### Areas 
 
 An 'area' is a distinct layout that is completely separate from another area. 
-For example many apps would have a `:frontend` area, and a `:backend` area.
+For example many apps would have a `:frontend` area, and an `:admin` area.
 
 If you app code is organised into modules, you may wish to keep a layout file in each module. 
 This way, the layout files can each place cells related to their own modules on any page of the app.
@@ -263,11 +264,16 @@ class Client::RenderingPolicy < Lotus::RenderingPolicy
   end
 
   def _render_action(action, response)
+    @area ||= @namespace.name.downcase.to_sym
     if successful?(response)
-      RequestStore.store[:action_exposures] = action.exposures
-      layout = Glia.layout(:frontend, action.handles)
-      layout.view_factory = ViewFactory.new
-      layout.cell(:root, action.exposures).render
+      if response[BODY].empty?
+        RequestStore.store[:action_exposures] = action.exposures
+        layout = Glia.layout(@area, action.handles)
+        layout.view_factory = ViewFactory.new
+        layout.cell(:root, action.exposures).render
+      else
+        Lotus::Views::NullView.new(response[BODY]).render(action.exposures)
+      end
     end
   end
 
