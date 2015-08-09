@@ -7,17 +7,19 @@ module Glia
       attr_accessor :layout_dir, :view_namespace
     end
 
-    def initialize(area, handles)
+    def initialize(area, handles, options = {})
+      @area = area
       @update = UpdateRegistry.area(area)
       @cells = {}
       @handles = handles
       @data = @update.merge(@handles)
+      @view_factory = options[:view_factory] unless options[:view_factory].nil?
     end
 
     def cell(name, *args)
       if @cells[name].nil?
         definition = @data[name]
-        raise Errors::MissingCellError, "Cell #{name} is missing from layout" if definition.nil?
+        raise Errors::MissingCellError, "Cell #{name} is missing from layout #{@area}" if definition.nil?
         code = definition.delete(:class)
         actions = definition.delete(:actions)
         children = definition.delete(:children)

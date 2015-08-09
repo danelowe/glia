@@ -3,8 +3,8 @@ module Glia
     attr_accessor :child_definitions, :layout, :blocks
 
     # To be overloaded, but here to prevent errors if we don't define initialize
-    def initialize(config)
-    end
+    # def initialize(config)
+    # end
 
     def children
       @children ||= {}

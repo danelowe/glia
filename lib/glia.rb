@@ -12,7 +12,7 @@ module Glia
     UpdateRegistry.area(code, &blk)
   end
 
-  def self.layout(area, handles)
-    Layout.new(area, handles)
+  def self.layout(area, handles, options = {})
+    Layout.new(area, handles, options)
   end
 end
