@@ -280,6 +280,40 @@ class Client::RenderingPolicy < Lotus::RenderingPolicy
 end
 ```
 
+## Theme Inheritance
+In addition to areas, Glia provides a means to override the layouts with different 'themes'. 
+
+For example. If your project serves multiple sites that each need a different header, you can achieve this with themes. 
+
+```ruby
+Glia::UpdateRegistry.area(:frontend, :default) do
+  handle :default do
+    cell name: :root, class: :html, template_name: 'root' do
+      cell name: :header, class: :template, template_name: 'header'
+      cell name: :footer, class: :template, template_name: 'footer'
+    end
+  end
+end
+
+Glia::UpdateRegistry.area(:frontend, :au) do
+  handle :default do
+    cell name: :root, class: :html, template_name: 'root' do
+      cell name: :header, class: :template, template_name: 'header_au'
+      remove name: :footer
+    end
+  end
+end
+```
+
+When you get the layout, just specify which themes you want to merge. 
+
+```ruby
+layout = Glia.layout(:frontend, [:default, :product_view], theme_inheritance: [:default, :au])
+```  
+
+There is no limit to the number of themes you can use in the inheritance chain. 
+It begins with the first theme, and applies updates from each successive theme.
+
 ## Notes
 * When the DSL is parsed, the result is a simple hash of values that describes the layout. 
 

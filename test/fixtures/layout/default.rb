@@ -31,3 +31,9 @@ Glia.area(:frontend) do
   end
 
 end
+
+Glia.area(:test_area) do
+  handle :test do
+    cell name: :test, class: :template, comment: 'This area should be cleared between each test, so not in tests'
+  end
+end

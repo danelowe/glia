@@ -8,8 +8,8 @@ require "glia/view_factory"
 
 module Glia
   # Your code goes here...
-  def self.area(code, &blk)
-    UpdateRegistry.area(code, &blk)
+  def self.area(code, theme = :default, &blk)
+    UpdateRegistry.area(code, theme, &blk)
   end
 
   def self.layout(area, handles, options = {})

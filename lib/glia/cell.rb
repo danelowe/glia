@@ -26,5 +26,9 @@ module Glia
     def blocks
       @blocks ||= []
     end
+
+    def themes
+      layout.themes
+    end
   end
 end

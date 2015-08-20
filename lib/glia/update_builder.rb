@@ -2,8 +2,8 @@ module Glia
 
   class UpdateBuilder
 
-    def initialize
-      @data = {}
+    def initialize(data = nil)
+      @data = data||{}
     end
 
     def view_namespace(namespace)
@@ -59,19 +59,27 @@ module Glia
       merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2 }
       handles.each{|h| _data = _data.merge(@data[h].clone, &merger) unless @data[h].nil?}
 
+      #returned cleaned merged data
+      _clean_handle(_data)
+    end
+
+    private
+
+    def _clean_handle(data)
+      _data = data.nil? ? {} : data.clone
       # Remove orphan references, or deleted cells
       _data = _data.delete_if{|k, v|  v.nil? || v[:class].nil? || v[:_removed]}
 
       # Tidy up child references for deleted children, empty child lists
       _data.each_with_object({}) do |(name, definition), hash|
         d = definition.clone
-        d[:children].delete_if{|position, n| _data[n].nil?}
-        d.delete(:children) if d[:children].empty?
+        unless d[:children].nil?
+          d[:children].delete_if{|position, n| _data[n].nil?}
+          d.delete(:children) if d[:children].empty?
+        end
         hash[name] = d
       end
     end
-
-    private
 
     def _cell(definition, &blk)
       raise Glia::Errors::SyntaxError, 'cell cannot be used outside of handle' if @current_scope.nil?

@@ -2,14 +2,16 @@ module Glia
 
   class Layout
     attr_writer :view_factory
-    attr_reader :handles, :data, :update, :cells
+    attr_reader :handles, :data, :update, :cells, :themes
+
     singleton_class.class_eval do
       attr_accessor :layout_dir, :view_namespace
     end
 
     def initialize(area, handles, options = {})
       @area = area
-      @update = UpdateRegistry.area(area)
+      @themes = options[:theme_inheritance] || [:default]
+      @update = UpdateRegistry.merge_themes(area, )
       @cells = {}
       @handles = handles
       @data = @update.merge(@handles)
