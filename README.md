@@ -22,10 +22,23 @@ And then execute:
 Or install it yourself as:
 
     $ gem install glia
+   
+## How do I?
+
+Have a layout-related problem and want to know if/how Glia can help?
+
+* Read through this README
+* Check out the [Glia Cells Example App](https://github.com/danelowe/glia_cells_example)
+* Leave any how-to questions as issues on [the example project](https://github.com/danelowe/glia_cells_example). 
+
+If the whole concept doesn't make sense to you, maybe your app is simple enough not to need it, or maybe it would help
+for you to know that Glia is heavily inspired by 
+[Magento's layout system](http://devdocs.magento.com/guides/m1x/magefordev/mage-for-dev-4.html) 
 
 ## Usage
 
 ### Cells 
+
 A Cell is a view object that renders a certain part of the page.
 
 **Glia does not provide an implementation of cells, but expects that you have this concept as part of your project.** 
