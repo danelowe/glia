@@ -33,6 +33,11 @@ module Glia
       _cell(definition, &blk)
     end
 
+    def update(definition)
+      raise Glia::Errors::SyntaxError, 'Update cannot be used outside of handle' if @current_scope.nil?
+      @current_scope.merge!(_duplicate_hash(@data[definition[:handle]]))
+    end
+
     def remove(definition)
       _cell(definition.merge({_removed: true}))
     end
@@ -56,7 +61,13 @@ module Glia
       _data = {}
 
       # Merge all of the handles together
-      merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2 }
+      merger = proc do |key, v1, v2|
+        if key == :actions
+          (v1||[])|(v2||[])
+        else
+          Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2
+        end
+      end
       handles.each{|h| _data = _data.merge(@data[h].clone, &merger) unless @data[h].nil?}
 
       #returned cleaned merged data
@@ -72,12 +83,19 @@ module Glia
 
       # Tidy up child references for deleted children, empty child lists
       _data.each_with_object({}) do |(name, definition), hash|
-        d = definition.clone
+        d = _duplicate_hash(definition)
         unless d[:children].nil?
           d[:children].delete_if{|position, n| _data[n].nil?}
           d.delete(:children) if d[:children].empty?
         end
         hash[name] = d
+      end
+    end
+
+    def _duplicate_hash(hash)
+      hash.each_with_object({}) do |(key, value), _hash|
+        _hash[key] = value.is_a?(Hash) ? _duplicate_hash(value) : value
+        # (value.dup rescue value) may duplicate classes.
       end
     end
 

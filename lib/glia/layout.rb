@@ -16,6 +16,9 @@ module Glia
       @handles = handles
       @data = @update.merge(@handles)
       @view_factory = options[:view_factory] unless options[:view_factory].nil?
+      if options[:eager_load]
+        @data.keys.each { |name| cell(name) }
+      end
     end
 
     def cell(name, *args)
@@ -32,6 +35,7 @@ module Glia
         end
         @cells[name].child_definitions = children
         @cells[name].layout = self
+        @cells[name].load if @cells[name].respond_to?(:load)
       end
       @cells[name]
     end

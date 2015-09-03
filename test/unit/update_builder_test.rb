@@ -7,7 +7,12 @@ class Glia::UpdateBuilder::Test < UnitTest
   end
 
   def test_cell
+    @builder.handle :update_me do
+      cell name: :update_me, class: :template, template_name: 'update_me'
+    end
     @builder.handle :test do
+      update handle: :update_me
+      reference name: :update_me, template_name: 'updated'
       reference name: :defined_later do
         cell name: :defined_later_sub_cell, class: :template, position: :here
       end
@@ -20,7 +25,11 @@ class Glia::UpdateBuilder::Test < UnitTest
       cell name: :defined_later, class: :list
     end
     expected_output = {
+        update_me: {
+            update_me: {children: {}, class: :template, template_name: 'update_me'}
+        },
         test: {
+            update_me: {children: {}, class: :template, template_name: 'updated'},
             root: {class: :html, template_name: 'root',
                    children: {header: :header}, actions: [{name: :compile, args: ['javascript', 'css']}]},
             header: {class: :template, template_name: 'header', children: {}},
